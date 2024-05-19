@@ -1,0 +1,48 @@
+package ru.practicum.javashareit.user;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.javashareit.user.dto.UserDto;
+
+import javax.validation.Valid;
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/users")
+@Slf4j
+public class UserController {
+    private final UserService userService;
+
+    @GetMapping
+    public List<UserDto> getAllUsers() {
+        log.info("Получен GET запрос на получение всех пользователей");
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{userId}")
+    public UserDto getUserById(@PathVariable Long userId) {
+        log.info("Получен GET запрос на получение пользователя по ID {}", userId);
+        return userService.getUserById(userId);
+    }
+
+    @PostMapping
+    public UserDto saveNewUser(@RequestBody @Valid User user) {
+        log.info("Получен POST запрос на сохранение пользователя {}", user);
+        return userService.saveUser(user);
+    }
+
+    @PatchMapping("/{userId}")
+    public UserDto updateUser(@RequestBody @Valid UserDto userDto,
+                              @PathVariable Long userId) {
+        log.info("Получен PATCH запрос на обновление данных пользователя ID {}. Новые данные: \n {}", userId, userDto);
+        return userService.updateUser(userDto, userId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public UserDto deleteUser(@PathVariable Long userId) {
+        log.info("Получен DELETE запрос на удаление пользователя по ID {}", userId);
+        return userService.deleteUser(userId);
+    }
+}
