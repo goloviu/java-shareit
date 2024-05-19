@@ -8,7 +8,7 @@ public class ItemMapper {
 
     public static ItemDto toItemDto(final Item item) {
         @Valid
-        ItemDto itemDto = new ItemDto().builder()
+        ItemDto itemDto = ItemDto.builder()
                 .id(item.getId())
                 .owner(item.getOwner())
                 .name(item.getName())
@@ -21,7 +21,7 @@ public class ItemMapper {
 
     public static Item toItem(final ItemDto itemDto) {
         @Valid
-        Item item = new Item().builder()
+        Item item = Item.builder()
                 .id(itemDto.getId())
                 .owner(itemDto.getOwner())
                 .name(itemDto.getName())
