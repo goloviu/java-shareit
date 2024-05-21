@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.dto.ItemRegisterDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -43,9 +43,9 @@ public class ItemController {
 
     @PostMapping
     public ItemDto addNewItem(@RequestHeader("X-Sharer-User-Id") Long userId,
-                              @RequestBody @Valid Item item) {
-        log.info("Получен POST запрос на добавление новой вещи от польхователя ID {}, вещи {}", userId, item);
-        return itemService.addNewItem(userId, item);
+                              @RequestBody @Valid ItemRegisterDto itemRegisterDto) {
+        log.info("Получен POST запрос на добавление новой вещи от пользователя ID {}, вещи {}", userId, itemRegisterDto);
+        return itemService.addNewItem(userId, itemRegisterDto);
     }
 
     @PatchMapping("/{itemId}")

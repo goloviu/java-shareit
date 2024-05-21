@@ -2,13 +2,10 @@ package ru.practicum.shareit.item.dto;
 
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.Valid;
-
 public class ItemMapper {
 
-    public static ItemDto toItemDto(final Item item) {
-        @Valid
-        ItemDto itemDto = ItemDto.builder()
+    public static ItemDto itemToItemDto(final Item item) {
+        return ItemDto.builder()
                 .id(item.getId())
                 .owner(item.getOwner())
                 .name(item.getName())
@@ -16,12 +13,10 @@ public class ItemMapper {
                 .available(item.getAvailable())
                 .request(item.getRequest())
                 .build();
-        return itemDto;
     }
 
-    public static Item toItem(final ItemDto itemDto) {
-        @Valid
-        Item item = Item.builder()
+    public static Item itemDtoToItem(final ItemDto itemDto) {
+        return Item.builder()
                 .id(itemDto.getId())
                 .owner(itemDto.getOwner())
                 .name(itemDto.getName())
@@ -29,6 +24,15 @@ public class ItemMapper {
                 .available(itemDto.getAvailable())
                 .request(itemDto.getRequest())
                 .build();
-        return item;
+    }
+
+    public static Item itemRegisterDtoToItem(final ItemRegisterDto itemRegisterDto) {
+        return Item.builder()
+                .owner(itemRegisterDto.getOwner())
+                .name(itemRegisterDto.getName())
+                .description(itemRegisterDto.getDescription())
+                .available(itemRegisterDto.getAvailable())
+                .request(itemRegisterDto.getRequest())
+                .build();
     }
 }

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
@@ -15,7 +14,7 @@ interface ItemRepository {
 
     Item save(final Item item);
 
-    Item updateItem(final ItemDto itemDto);
+    Item updateItem(final Item item);
 
     void deleteByUserIdAndItemId(final Long userId, final Long itemId);
 

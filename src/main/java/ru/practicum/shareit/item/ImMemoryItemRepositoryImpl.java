@@ -3,7 +3,6 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collections;
@@ -64,14 +63,14 @@ public class ImMemoryItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Item updateItem(final ItemDto itemDto) {
-        if (itemDto.getId() == null || !items.containsKey(itemDto.getId())) {
-            throw new IllegalArgumentException("Некорректно указан ID предмета: " + itemDto.getId());
+    public Item updateItem(final Item item) {
+        if (item.getId() == null || !items.containsKey(item.getId())) {
+            throw new IllegalArgumentException("Некорректно указан ID предмета: " + item.getId());
         }
 
-        checkItemExist(itemDto.getId());
+        checkItemExist(item.getId());
 
-        Item itemForUpdate = items.get(itemDto.getId());
+        Item itemForUpdate = items.get(item.getId());
 
         Item itemBeforeUpdate = Item.builder()
                 .id(itemForUpdate.getId())
@@ -82,11 +81,11 @@ public class ImMemoryItemRepositoryImpl implements ItemRepository {
                 .request(itemForUpdate.getRequest())
                 .build();
 
-        updateFields(itemDto);
+        updateFields(item);
 
-        items.put(itemDto.getId(), itemForUpdate);
-        log.info("Предмет с ID {} успешно обновлен в БД. \nБыло: {} \nСтало: {}", itemDto.getId(), itemBeforeUpdate,
-                itemDto);
+        items.put(item.getId(), itemForUpdate);
+        log.info("Предмет с ID {} успешно обновлен в БД. \nБыло: {} \nСтало: {}", item.getId(), itemBeforeUpdate,
+                item);
         return itemForUpdate;
     }
 
@@ -110,29 +109,29 @@ public class ImMemoryItemRepositoryImpl implements ItemRepository {
         return itemId++;
     }
 
-    private Item updateFields(final ItemDto itemDto) {
-        Item item = items.get(itemDto.getId());
+    private Item updateFields(final Item item) {
+        Item updateItem = items.get(item.getId());
 
-        if (itemDto.getName() != null && itemDto.getDescription() != null && itemDto.getAvailable() != null) {
-            item.setName(itemDto.getName());
-            item.setDescription(itemDto.getDescription());
-            item.setAvailable(itemDto.getAvailable());
-        } else if (itemDto.getName() != null && itemDto.getDescription() != null) {
-            item.setName(itemDto.getName());
-            item.setDescription(itemDto.getDescription());
-        } else if (itemDto.getName() != null && itemDto.getAvailable() != null) {
-            item.setName(itemDto.getName());
-            item.setAvailable(itemDto.getAvailable());
-        } else if (itemDto.getDescription() != null && itemDto.getAvailable() != null) {
-            item.setDescription(itemDto.getDescription());
-            item.setAvailable(itemDto.getAvailable());
-        } else if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
-        } else if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
-        } else if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
+        if (item.getName() != null && item.getDescription() != null && item.getAvailable() != null) {
+            updateItem.setName(item.getName());
+            updateItem.setDescription(item.getDescription());
+            updateItem.setAvailable(item.getAvailable());
+        } else if (item.getName() != null && item.getDescription() != null) {
+            updateItem.setName(item.getName());
+            updateItem.setDescription(item.getDescription());
+        } else if (item.getName() != null && item.getAvailable() != null) {
+            updateItem.setName(item.getName());
+            updateItem.setAvailable(item.getAvailable());
+        } else if (item.getDescription() != null && item.getAvailable() != null) {
+            updateItem.setDescription(item.getDescription());
+            updateItem.setAvailable(item.getAvailable());
+        } else if (item.getName() != null) {
+            updateItem.setName(item.getName());
+        } else if (item.getDescription() != null) {
+            updateItem.setDescription(item.getDescription());
+        } else if (item.getAvailable() != null) {
+            updateItem.setAvailable(item.getAvailable());
         }
-        return item;
+        return updateItem;
     }
 }

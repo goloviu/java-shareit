@@ -4,17 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.UserAlreadyExistsException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
 public class InMemoryUserRepositoryImpl implements UserRepository {
-    private final HashMap<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
     private Long id = 1L;
 
     @Override
@@ -37,31 +37,33 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
         } else if (user.getId() != null) {
             throw new IllegalArgumentException("У нового пользователя не должен быть указан ID");
         }
+
         user.setId(generateId());
+        checkEmailExist(user);
         users.put(user.getId(), user);
         log.info("Пользователь с ID {} успешно сохранен в БД. \n {}", user.getId(), user);
         return user;
     }
 
     @Override
-    public User updateUser(UserDto userDto) {
-        if (userDto.getId() == null || !users.containsKey(userDto.getId())) {
-            throw new IllegalArgumentException("Некорректно указан ID пользователя: " + userDto.getId());
+    public User updateUser(User user) {
+        if (user.getId() == null || !users.containsKey(user.getId())) {
+            throw new IllegalArgumentException("Некорректно указан ID пользователя: " + user.getId());
         }
 
-        checkUserExist(userDto.getId());
-        checkEmailExist(userDto);
+        checkUserExist(user.getId());
+        checkEmailExist(user);
 
-        User userForUpdate = users.get(userDto.getId());
+        User userForUpdate = users.get(user.getId());
         User userBeforeUpdate = User.builder()
                 .id(userForUpdate.getId())
                 .name(userForUpdate.getName())
                 .email(userForUpdate.getEmail())
                 .build();
 
-        User userAfterUpdate = updateFields(userDto);
-        users.put(userDto.getId(), userAfterUpdate);
-        log.info("Пользователь с ID {} успешно обновлен в БД. \nБыло: {} \nСтало: {}", userDto.getId(), userBeforeUpdate,
+        User userAfterUpdate = updateFields(user);
+        users.put(user.getId(), userAfterUpdate);
+        log.info("Пользователь с ID {} успешно обновлен в БД. \nБыло: {} \nСтало: {}", user.getId(), userBeforeUpdate,
                 userAfterUpdate);
         return userAfterUpdate;
     }
@@ -82,25 +84,25 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
         }
     }
 
-    private User updateFields(final UserDto userDto) {
-        User user = users.get(userDto.getId());
+    private User updateFields(final User user) {
+        User dbUser = users.get(user.getId());
 
-        if (userDto.getName() != null && userDto.getEmail() != null) {
-            user.setName(userDto.getName());
-            user.setEmail(userDto.getEmail());
-        } else if (userDto.getName() != null) {
-            user.setName(userDto.getName());
-        } else if (userDto.getEmail() != null) {
-            user.setEmail(userDto.getEmail());
+        if (user.getName() != null && user.getEmail() != null) {
+            dbUser.setName(user.getName());
+            dbUser.setEmail(user.getEmail());
+        } else if (user.getName() != null) {
+            dbUser.setName(user.getName());
+        } else if (user.getEmail() != null) {
+            dbUser.setEmail(user.getEmail());
         }
-        return user;
+        return dbUser;
     }
 
-    private void checkEmailExist(final UserDto userDto) {
+    private void checkEmailExist(final User user) {
         Boolean isEmailExist = users.values().stream()
-                .anyMatch(user -> user.getEmail().equals(userDto.getEmail()) && !user.getId().equals(userDto.getId()));
+                .anyMatch(dbUser -> dbUser.getEmail().equals(user.getEmail()) && !dbUser.getId().equals(user.getId()));
         if (isEmailExist) {
-            throw new IllegalArgumentException("Данная почта уже существует в БД " + userDto.getEmail());
+            throw new IllegalArgumentException("Данная почта уже существует в БД " + user.getEmail());
         }
     }
 

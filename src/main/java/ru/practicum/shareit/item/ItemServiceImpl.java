@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.PermissionException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemRegisterDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -28,29 +29,29 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getOwnerItems(final Long userId) {
         List<Item> items = itemStorage.findItemsByUserId(userId);
         return items.stream()
-                .map(ItemMapper::toItemDto)
+                .map(ItemMapper::itemToItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto getItemById(final Long itemId) {
-        return ItemMapper.toItemDto(itemStorage.getItemById(itemId));
+        return ItemMapper.itemToItemDto(itemStorage.getItemById(itemId));
     }
 
     @Override
     public List<ItemDto> findItemsByText(String regEx) {
         List<Item> items = itemStorage.findItemsByText(regEx);
         return items.stream()
-                .map(ItemMapper::toItemDto)
+                .map(ItemMapper::itemToItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ItemDto addNewItem(final Long userId, final Item item) {
+    public ItemDto addNewItem(final Long userId, final ItemRegisterDto itemRegisterDto) {
         userStorage.checkUserExist(userId);
 
-        item.setOwner(userId);
-        return ItemMapper.toItemDto(itemStorage.save(item));
+        itemRegisterDto.setOwner(userId);
+        return ItemMapper.itemToItemDto(itemStorage.save(ItemMapper.itemRegisterDtoToItem(itemRegisterDto)));
     }
 
     @Override
@@ -62,7 +63,7 @@ public class ItemServiceImpl implements ItemService {
         }
         itemDto.setOwner(userId);
         itemDto.setId(itemId);
-        return ItemMapper.toItemDto(itemStorage.updateItem(itemDto));
+        return ItemMapper.itemToItemDto(itemStorage.updateItem(ItemMapper.itemDtoToItem(itemDto)));
     }
 
     @Override

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.UserRegisterDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -29,9 +29,9 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto saveNewUser(@RequestBody @Valid User user) {
-        log.info("Получен POST запрос на сохранение пользователя {}", user);
-        return userService.saveUser(user);
+    public UserDto saveNewUser(@RequestBody @Valid UserRegisterDto userRegisterDto) {
+        log.info("Получен POST запрос на сохранение пользователя {}", userRegisterDto);
+        return userService.saveUser(userRegisterDto);
     }
 
     @PatchMapping("/{userId}")
