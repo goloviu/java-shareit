@@ -48,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addNewItem(final Long userId, final ItemRegisterDto itemRegisterDto) {
-        userStorage.checkUserExist(userId);
+        userStorage.existsById(userId);
 
         itemRegisterDto.setOwner(userId);
         return ItemMapper.itemToItemDto(itemStorage.save(ItemMapper.itemRegisterDtoToItem(itemRegisterDto)));

@@ -1,7 +1,8 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.dto.UserRegisterDto;
@@ -11,9 +12,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 class UserServiceImpl implements UserService {
     private final UserRepository repository;
+
+    @Autowired
+    public UserServiceImpl(UserRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -25,7 +30,8 @@ class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(final Long userId) {
-        return UserMapper.userToUserDto(repository.getUserById(userId));
+        return UserMapper.userToUserDto(repository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден по ID " + userId)));
     }
 
     @Override
@@ -36,11 +42,11 @@ class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(final UserDto userDto, final Long userId) {
         userDto.setId(userId);
-        return UserMapper.userToUserDto(repository.updateUser(UserMapper.userDtoToUser(userDto)));
+        return UserMapper.userToUserDto(repository.save(UserMapper.userDtoToUser(userDto)));
     }
 
     @Override
     public UserDto deleteUser(final Long userId) {
-        return UserMapper.userToUserDto(repository.deleteUser(userId));
+        return UserMapper.userToUserDto(repository.removeById(userId));
     }
 }

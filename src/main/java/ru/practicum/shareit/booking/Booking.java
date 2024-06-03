@@ -2,19 +2,25 @@ package ru.practicum.shareit.booking;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
+@Entity
+@Table(name = "bookings")
 public class Booking {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotBlank(message = "Время начала бронирования не задано")
+    @Column(name = "start_date")
     private LocalDateTime start;
-    @NotBlank(message = "Время окончания бронирования не задано")
+    @Column(name = "end_date")
     private LocalDateTime end;
-    @NotBlank(message = "ID предмета не указан")
+    @Column(name = "item_id")
     private Integer itemId;
-    @NotBlank(message = "ID пользователя не указан")
+    @Column(name = "booker_id")
     private Integer bookerId;
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private BookingStatusType status;
 }

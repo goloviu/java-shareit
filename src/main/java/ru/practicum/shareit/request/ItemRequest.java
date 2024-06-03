@@ -2,14 +2,18 @@ package ru.practicum.shareit.request;
 
 import lombok.Data;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @Data
+@Entity
 public class ItemRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @NotBlank(message = "Не указан ID пользователя, создавшего запрос")
+    @Column(name = "requestor_id")
     private Integer requestorId;
-    @NotBlank(message = "Описание не задано")
+    @Column(name = "description")
     private String description;
     private String created;
 }
