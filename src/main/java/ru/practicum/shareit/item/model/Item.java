@@ -10,7 +10,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "itmes")
+@Table(name = "items")
 public class Item {
     @EqualsAndHashCode.Exclude
     @Id
