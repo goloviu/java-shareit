@@ -39,16 +39,16 @@ public class BookingServiceImpl implements BookingService {
         checkBooking(bookingRequestDto);
         Long itemId = bookingRequestDto.getItemId();
 
-        Item itemFromDb = itemStorage.findById(itemId).
-                orElseThrow(() -> new ItemNotFoundException("Не найден предмет по ID " + itemId));
+        Item itemFromDb = itemStorage.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException("Не найден предмет по ID " + itemId));
 
         if (itemFromDb.getOwner().equals(userId)) {
             throw new PermissionException("Пользователь не может запросить бронирование у себя. Пользователь ID "
                     + userId + " владелец предмета ID " + itemFromDb.getOwner());
         }
 
-        User user = userStorage.findById(userId).
-                orElseThrow(() -> new UserNotFoundException("Пользователь не найден по ID " + userId));
+        User user = userStorage.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден по ID " + userId));
 
         checkAvailableItem(itemFromDb);
         bookingRequest.setItem(itemFromDb);
@@ -63,8 +63,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto ownerChangeStatus(Long userId, Long bookingId, Boolean approved) {
-        Booking booking = bookingStorage.findById(bookingId).
-                orElseThrow(() -> new BookingNotFoundException("Бронирование не найдено по ID " + bookingId));
+        Booking booking = bookingStorage.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Бронирование не найдено по ID " + bookingId));
 
         if (!booking.getItem().getOwner().equals(userId)) {
             throw new PermissionException("У вас недостаточно прав для изменения статуса");
@@ -87,8 +87,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public BookingDto getBookingById(Long userId, Long bookingId) {
-        Booking booking = bookingStorage.findById(bookingId).
-                orElseThrow(() -> new BookingNotFoundException("Бронирование не найдено по ID " + bookingId));
+        Booking booking = bookingStorage.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Бронирование не найдено по ID " + bookingId));
 
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().equals(userId)) {
             throw new PermissionException("У вас недостаточно прав для получения бронирования по ID " + booking);
