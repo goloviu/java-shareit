@@ -81,6 +81,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking savedBooking = bookingStorage.save(booking);
+        log.info("Обновлены данные владелцем, результат сохранения: \n {}", savedBooking);
         return BookingMapper.bookingToBookingDto(savedBooking);
     }
 
@@ -89,6 +90,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long userId, Long bookingId) {
         Booking booking = bookingStorage.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException("Бронирование не найдено по ID " + bookingId));
+        log.info("Получено бронирование с БД по ID {}, пользователю ID {} Бронирование: \n {}", bookingId, userId,
+                booking);
 
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().equals(userId)) {
             throw new PermissionException("У вас недостаточно прав для получения бронирования по ID " + booking);
@@ -110,23 +113,37 @@ public class BookingServiceImpl implements BookingService {
         switch (state.toUpperCase()) {
             case "ALL":
                 bookings = bookingStorage.findAllByBookerId(userId);
+                log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "CURRENT":
                 bookings = bookingStorage.findAllCurrentBookings(userId, LocalDateTime.now());
+                log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "PAST":
                 bookings = bookingStorage.findAllPastBookings(userId, LocalDateTime.now());
+                log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "FUTURE":
                 bookings = bookingStorage.findAllFutureBookings(userId);
+                log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "WAITING":
                 bookings = bookingStorage.findAllByBookerAndStatus(userId, BookingStatusType.WAITING);
+                log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "REJECTED":
                 bookings = bookingStorage.findAllByBookerAndStatus(userId, BookingStatusType.REJECTED);
+                log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             default:
+                log.info("Запрос получения списка бронирования не получилось обработать. Пользователь ID {}," +
+                        " статус: \'{}\'", userId, state);
                 return Collections.emptyList();
 
         }
@@ -146,23 +163,37 @@ public class BookingServiceImpl implements BookingService {
         switch (state.toUpperCase()) {
             case "ALL":
                 bookings = bookingStorage.findAllOwnerItemBookings(userId);
+                log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "CURRENT":
                 bookings = bookingStorage.findAllOwnerCurrentBookings(userId, LocalDateTime.now());
+                log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "PAST":
                 bookings = bookingStorage.findAllPastOwnerItemBookings(userId, LocalDateTime.now());
+                log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "FUTURE":
                 bookings = bookingStorage.findAllFutureOwnerItemBookings(userId, LocalDateTime.now());
+                log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "WAITING":
                 bookings = bookingStorage.findAllOwnerItemBookedByStatus(userId, BookingStatusType.WAITING);
+                log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "REJECTED":
                 bookings = bookingStorage.findAllOwnerItemBookedByStatus(userId, BookingStatusType.REJECTED);
+                log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
+                        " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             default:
+                log.info("Запрос получения списка бронирования не получилось обработать. Пользователь ID {}," +
+                        " статус: \'{}\'", userId, state);
                 return Collections.emptyList();
 
         }
