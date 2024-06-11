@@ -1,15 +1,14 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemRegisterDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
 public interface ItemService {
 
-    List<ItemDto> getOwnerItems(final Long userId);
+    List<ItemWithBookingDto> getOwnerItemsWithBookings(final Long userId);
 
-    ItemDto getItemById(final Long itemId);
+    ItemWithBookingDto getItemByIdWithBooking(final Long userId, final Long itemId);
 
     List<ItemDto> findItemsByText(final String regEx);
 
@@ -18,4 +17,6 @@ public interface ItemService {
     ItemDto updateItem(final Long userId, final Long itemId, final ItemDto itemDto);
 
     void deleteItem(final Long userId, final Long itemId);
+
+    CommentDto addNewComment(final Long userId, final Long itemId, final CommentAddDto commentAddDto);
 }

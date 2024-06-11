@@ -1,20 +1,36 @@
 package ru.practicum.shareit.booking;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "bookings")
 public class Booking {
-    private Integer id;
-    @NotBlank(message = "Время начала бронирования не задано")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "start_date")
     private LocalDateTime start;
-    @NotBlank(message = "Время окончания бронирования не задано")
+    @Column(name = "end_date")
     private LocalDateTime end;
-    @NotBlank(message = "ID предмета не указан")
-    private Integer itemId;
-    @NotBlank(message = "ID пользователя не указан")
-    private Integer bookerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    private Item item;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booker_id")
+    private User booker;
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private BookingStatusType status;
 }

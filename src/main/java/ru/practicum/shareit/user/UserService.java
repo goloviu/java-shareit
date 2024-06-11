@@ -15,5 +15,5 @@ interface UserService {
 
     UserDto updateUser(final UserDto userDto, final Long userId);
 
-    UserDto deleteUser(final Long userId);
+    boolean deleteUser(final Long userId);
 }

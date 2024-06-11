@@ -6,8 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemRegisterDto;
+import ru.practicum.shareit.item.dto.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -24,15 +23,16 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
-        log.info("Получен GET запрос на получение предмета по ID {}", itemId);
-        return itemService.getItemById(itemId);
+    public ItemWithBookingDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                          @PathVariable Long itemId) {
+        log.info("Получен GET запрос на получение предмета по ID {}, от пользователя ID {}", itemId, userId);
+        return itemService.getItemByIdWithBooking(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemWithBookingDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен GET запрос на получение всех предметов владельца по ID {}", userId);
-        return itemService.getOwnerItems(userId);
+        return itemService.getOwnerItemsWithBookings(userId);
     }
 
     @GetMapping("/search")
@@ -57,9 +57,16 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteItem(@RequestHeader("X-Later-User-Id") Long userId,
+    public void deleteItem(@RequestHeader("X-Sharer-User-Id") Long userId,
                            @PathVariable Long itemId) {
         log.info("Получен DELETE запрос на удаление вещи из БД");
         itemService.deleteItem(userId, itemId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addNewComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                    @PathVariable Long itemId,
+                                    @RequestBody @Valid CommentAddDto comment) {
+        return itemService.addNewComment(userId, itemId, comment);
     }
 }
