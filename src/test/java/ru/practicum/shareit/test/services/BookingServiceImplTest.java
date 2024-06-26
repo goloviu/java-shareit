@@ -114,8 +114,9 @@ class BookingServiceImplTest {
     void testAddNewRequest_ShouldReturnError_WhenBookingRequestDtoEndDateAndStartDateSame() {
         // given
         BookingRequestDto bookingRequestDto = makeDefaultBookingRequestDto();
-        bookingRequestDto.setEnd(LocalDateTime.now().plusHours(5));
-        bookingRequestDto.setStart(LocalDateTime.now().plusHours(5));
+        LocalDateTime plusFiveHourseFromNow = LocalDateTime.now().plusHours(5);
+        bookingRequestDto.setEnd(plusFiveHourseFromNow);
+        bookingRequestDto.setStart(plusFiveHourseFromNow);
 
         // expect
         final DateTimeBookingException exception = Assertions.assertThrows(
