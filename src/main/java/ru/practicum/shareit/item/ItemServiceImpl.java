@@ -100,8 +100,6 @@ public class ItemServiceImpl implements ItemService {
 
         if (itemStorage.exists(Example.of(registredItem))) {
             throw new IllegalArgumentException("Вещь уже существует");
-        } else if (registredItem.getId() != null) {
-            throw new IllegalArgumentException("У новой вещи не должен быть указан ID");
         }
 
         Item item = itemStorage.saveItem(registredItem, itemRegisterDto.getRequestId());

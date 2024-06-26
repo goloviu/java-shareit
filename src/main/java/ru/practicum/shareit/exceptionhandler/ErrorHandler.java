@@ -20,13 +20,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse existUserExceptionHandle(UserAlreadyExistsException exception) {
-        log.warn("Пользователь уже существует \n {}", exception);
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationExceptionHandle(MethodArgumentNotValidException exception) {
         log.warn("Данные не прошли валидацию \n {}", exception);

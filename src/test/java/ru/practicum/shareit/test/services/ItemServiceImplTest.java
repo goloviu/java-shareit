@@ -10,6 +10,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatusType;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.ItemService;
@@ -23,6 +24,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -200,6 +202,80 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void testGetItemByIdWithBooking_ShouldReturnItemWithBookingsByItemId_WhenItemExistsAndExitsOnlyLastBooking() {
+        // given
+        Item item = makeDefaultItem();
+        item.setOwner(1L);
+
+        User user = makeDefaultUser();
+
+        Comment comment = makeDefaultComment();
+
+        Booking lastBooking = Booking.builder()
+                .id(2L)
+                .item(item)
+                .booker(user)
+                .status(BookingStatusType.APPROVED)
+                .start(LocalDateTime.now().minusHours(2))
+                .end(LocalDateTime.now().plusHours(2))
+                .build();
+
+        when(itemStorage.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(bookingStorage.findLastBooking(anyLong(), isA(LocalDateTime.class)))
+                .thenReturn(List.of(lastBooking));
+        when(bookingStorage.findNextBooking(anyLong(), isA(LocalDateTime.class)))
+                .thenReturn(Collections.emptyList());
+        when(commentStorage.findByItemId(anyLong()))
+                .thenReturn(List.of(comment));
+
+        // do
+        ItemWithBookingDto result = itemService.getItemByIdWithBooking(user.getId(), item.getId());
+        ItemWithBookingDto expect = ItemMapper.itemToItemWithBookingDto(item);
+        expect.setLastBooking(new BookingShortDto(lastBooking.getId(), lastBooking.getBooker().getId()));
+        expect.setComments(List.of(ItemMapper.commentToCommentDto(comment)));
+
+        // expect
+        verify(itemStorage, times(1))
+                .findById(anyLong());
+        verify(bookingStorage, times(1))
+                .findNextBooking(anyLong(), isA(LocalDateTime.class));
+        verify(bookingStorage, times(1))
+                .findLastBooking(anyLong(), isA(LocalDateTime.class));
+        verify(commentStorage, times(1))
+                .findByItemId(anyLong());
+        verifyNoMoreInteractions(itemStorage, bookingStorage, commentStorage);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
+    void testGetItemByIdWithBooking_ShouldReturnItemWithoutBookingsByItemId_WhenItemExistsAndUserNotOwner() {
+        // given
+        Item item = makeDefaultItem();
+        User user = makeDefaultUser();
+
+        Comment comment = makeDefaultComment();
+
+        when(itemStorage.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        when(commentStorage.findByItemId(anyLong()))
+                .thenReturn(List.of(comment));
+
+        // do
+        ItemWithBookingDto result = itemService.getItemByIdWithBooking(user.getId(), item.getId());
+        ItemWithBookingDto expect = ItemMapper.itemToItemWithBookingDto(item);
+        expect.setComments(List.of(ItemMapper.commentToCommentDto(comment)));
+
+        // expect
+        verify(itemStorage, times(1))
+                .findById(anyLong());
+        verify(commentStorage, times(1))
+                .findByItemId(anyLong());
+        verifyNoMoreInteractions(itemStorage, commentStorage);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
     void testGetItemByIdWithBooking_ShouldReturnError_WhenItemNotExists() {
         // given
         Long itemId = 1L;
@@ -307,7 +383,7 @@ class ItemServiceImplTest {
         Long userId = 1L;
 
         when(userStorage.existsById(anyLong()))
-                .thenThrow(new UserNotFoundException("Пользователя по ID " + userId + " не существует"));
+                .thenReturn(false);
 
         // expect
         final UserNotFoundException exception = assertThrows(
@@ -331,7 +407,7 @@ class ItemServiceImplTest {
         when(userStorage.existsById(anyLong()))
                 .thenReturn(true);
         when(itemStorage.exists(isA(Example.class)))
-                .thenThrow(new IllegalArgumentException("Вещь уже существует"));
+                .thenReturn(true);
         // expect
         final IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -428,6 +504,87 @@ class ItemServiceImplTest {
                 .name("UPDATED ITEM TEST NAME")
                 .description("UPDATED ITEM TEST DESCRIPTION")
                 .available(false)
+                .build();
+
+        when(itemStorage.findById(item.getId()))
+                .thenReturn(Optional.of(item));
+        when(itemStorage.save(isA(Item.class)))
+                .thenReturn(item);
+        // do
+        ItemDto result = itemService.updateItem(userId, item.getId(), itemDto);
+        ItemDto expect = ItemMapper.itemToItemDto(item);
+
+        // expect
+        verify(itemStorage, times(1))
+                .findById(anyLong());
+        verify(itemStorage, times(1))
+                .save(isA(Item.class));
+        verifyNoMoreInteractions(itemStorage);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
+    void testUpdateItem_ShouldUpdateItemNameAndItemDescription_WhenItemExists() {
+        // given
+        Item item = makeDefaultItem();
+        Long userId = 2L;
+        ItemDto itemDto = ItemDto.builder()
+                .name("UPDATED ITEM TEST NAME")
+                .description("UPDATED ITEM TEST DESCRIPTION")
+                .build();
+
+        when(itemStorage.findById(item.getId()))
+                .thenReturn(Optional.of(item));
+        when(itemStorage.save(isA(Item.class)))
+                .thenReturn(item);
+        // do
+        ItemDto result = itemService.updateItem(userId, item.getId(), itemDto);
+        ItemDto expect = ItemMapper.itemToItemDto(item);
+
+        // expect
+        verify(itemStorage, times(1))
+                .findById(anyLong());
+        verify(itemStorage, times(1))
+                .save(isA(Item.class));
+        verifyNoMoreInteractions(itemStorage);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
+    void testUpdateItem_ShouldUpdateItemNameAndItemAvailable_WhenItemExists() {
+        // given
+        Item item = makeDefaultItem();
+        Long userId = 2L;
+        ItemDto itemDto = ItemDto.builder()
+                .name("UPDATED ITEM TEST NAME")
+                .available(true)
+                .build();
+
+        when(itemStorage.findById(item.getId()))
+                .thenReturn(Optional.of(item));
+        when(itemStorage.save(isA(Item.class)))
+                .thenReturn(item);
+        // do
+        ItemDto result = itemService.updateItem(userId, item.getId(), itemDto);
+        ItemDto expect = ItemMapper.itemToItemDto(item);
+
+        // expect
+        verify(itemStorage, times(1))
+                .findById(anyLong());
+        verify(itemStorage, times(1))
+                .save(isA(Item.class));
+        verifyNoMoreInteractions(itemStorage);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
+    void testUpdateItem_ShouldUpdateItemDescriptionAndItemAvailable_WhenItemExists() {
+        // given
+        Item item = makeDefaultItem();
+        Long userId = 2L;
+        ItemDto itemDto = ItemDto.builder()
+                .description("UPDATED ITEM TEST DESCRIPTION")
+                .available(true)
                 .build();
 
         when(itemStorage.findById(item.getId()))

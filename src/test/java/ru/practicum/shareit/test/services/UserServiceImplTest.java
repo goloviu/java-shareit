@@ -153,6 +153,66 @@ class UserServiceImplTest {
     }
 
     @Test
+    void testUpdateUser_ShouldReturnUpdatedUserName_WhenUserExists() {
+        // given
+        User user = makeDefaultUser();
+        UserDto userDto = UserMapper.userToUserDto(user);
+        userDto.setEmail(null);
+
+        when(userRepository.save(isA(User.class)))
+                .thenReturn(user);
+        when(userRepository.existsById(anyLong()))
+                .thenReturn(true);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        // do
+        UserDto result = userService.updateUser(userDto, userDto.getId());
+        UserDto expect = UserMapper.userToUserDto(user);
+
+        // expect
+        verify(userRepository, times(1))
+                .save(isA(User.class));
+        verify(userRepository, times(1))
+                .existsById(anyLong());
+        verify(userRepository, times(1))
+                .findById(anyLong());
+        verifyNoMoreInteractions(userRepository);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
+    void testUpdateUser_ShouldReturnUpdatedUserEmail_WhenUserExists() {
+        // given
+        User user = makeDefaultUser();
+        UserDto userDto = UserMapper.userToUserDto(user);
+        userDto.setName(null);
+
+        when(userRepository.save(isA(User.class)))
+                .thenReturn(user);
+        when(userRepository.exists(isA(Example.class)))
+                .thenReturn(true);
+        when(userRepository.existsById(anyLong()))
+                .thenReturn(true);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.of(user));
+        // do
+        UserDto result = userService.updateUser(userDto, userDto.getId());
+        UserDto expect = UserMapper.userToUserDto(user);
+
+        // expect
+        verify(userRepository, times(1))
+                .save(isA(User.class));
+        verify(userRepository, times(2))
+                .exists(isA(Example.class));
+        verify(userRepository, times(1))
+                .existsById(anyLong());
+        verify(userRepository, times(1))
+                .findById(anyLong());
+        verifyNoMoreInteractions(userRepository);
+        assertThat(result, equalTo(expect));
+    }
+
+    @Test
     void testUpdateUser_ShouldReturnError_WhenUserNotExists() {
         // given
         User user = makeDefaultUser();

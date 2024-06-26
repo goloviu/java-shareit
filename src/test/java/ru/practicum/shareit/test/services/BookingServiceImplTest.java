@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.BookingServiceImpl;
@@ -556,6 +557,34 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void testGetOwnerBookings_ShouldReturnAllBookingsByItemOwnerId_WhenStateIsCurrent() {
+        // given
+        PageRequest page = PageRequest.of(0, 1);
+        String state = "CURRENT";
+        Long userId = 2L;
+        Booking booking = makeDefaultBooking();
+
+        when(bookingStorage.findAllOwnerCurrentBookings(anyLong(), isA(LocalDateTime.class), isA(Pageable.class)))
+                .thenReturn(List.of(booking));
+        when(userStorage.existsById(anyLong()))
+                .thenReturn(true);
+        // do
+        List<BookingDto> result = bookingService.getOwnerBookings(userId, state, page);
+
+        BookingDto bookingDto = BookingMapper.bookingToBookingDto(booking);
+        List<BookingDto> expect = List.of(bookingDto);
+
+        // expect
+        verify(userStorage, times(1))
+                .existsById(anyLong());
+        verify(bookingStorage, times(1))
+                .findAllOwnerCurrentBookings(anyLong(), isA(LocalDateTime.class), isA(Pageable.class));
+        verifyNoMoreInteractions(userStorage, bookingStorage);
+        assertThat(result, equalTo(expect));
+        assertThat(booking.getItem().getOwner(), equalTo(userId));
+    }
+
+    @Test
     void testGetOwnerBookings_ShouldReturnPastBookingsByOwnerId_WhenStateIsPast() {
         // given
         PageRequest page = PageRequest.of(0, 1);
@@ -767,6 +796,34 @@ class BookingServiceImplTest {
         verifyNoMoreInteractions(userStorage, bookingStorage);
         assertThat(result, equalTo(expect));
         assertThat(booking.getEnd().isBefore(LocalDateTime.now()), equalTo(true));
+    }
+
+    @Test
+    void testGetBookingByUserId_ShouldReturnCurrentBookings_WhenStateIsCurrent() {
+        // given
+        PageRequest page = PageRequest.of(0, 1);
+        String state = "CURRENT";
+        Long userId = 2L;
+        Booking booking = makeDefaultBooking();
+
+        when(bookingStorage.findAllCurrentBookings(anyLong(), isA(LocalDateTime.class), isA(Pageable.class)))
+                .thenReturn(List.of(booking));
+        when(userStorage.existsById(anyLong()))
+                .thenReturn(true);
+        // do
+        List<BookingDto> result = bookingService.getBookingByUserId(userId, state, page);
+
+        BookingDto bookingDto = BookingMapper.bookingToBookingDto(booking);
+        List<BookingDto> expect = List.of(bookingDto);
+
+        // expect
+        verify(userStorage, times(1))
+                .existsById(anyLong());
+        verify(bookingStorage, times(1))
+                .findAllCurrentBookings(anyLong(), isA(LocalDateTime.class), isA(Pageable.class));
+        verifyNoMoreInteractions(userStorage, bookingStorage);
+        assertThat(result, equalTo(expect));
+        assertThat(booking.getItem().getOwner(), equalTo(userId));
     }
 
     @Test
