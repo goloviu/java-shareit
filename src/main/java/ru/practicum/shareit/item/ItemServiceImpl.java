@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -11,6 +12,8 @@ import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
@@ -28,7 +31,8 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentStorage;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemStorage, UserRepository userStorage, BookingRepository bookingStorage, CommentRepository commentStorage) {
+    public ItemServiceImpl(ItemRepository itemStorage, UserRepository userStorage,
+                           BookingRepository bookingStorage, CommentRepository commentStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
         this.bookingStorage = bookingStorage;
@@ -37,8 +41,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemWithBookingDto> getOwnerItemsWithBookings(final Long userId) {
-        List<Item> items = itemStorage.findByOwner(userId);
+    public List<ItemWithBookingDto> getOwnerItemsWithBookings(final Long userId, final Pageable page) {
+        List<Item> items = itemStorage.findByOwner(userId, page);
 
         log.info("Сервис обработал получение предметов из базы. Результат: \n {}", items);
         List<ItemWithBookingDto> itemDtos = new ArrayList<>();
@@ -73,12 +77,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> findItemsByText(String regEx) {
+    public List<ItemDto> findItemsByText(String regEx, Pageable page) {
         if (regEx == null || regEx.isBlank()) {
             return Collections.emptyList();
         }
 
-        List<Item> items = itemStorage.findAvailableItemsByText(regEx);
+        List<Item> items = itemStorage.findAvailableItemsByText(regEx, page);
         log.info("Сервис обработал запрос на нахождение предметов по ключевому слову \'{}\', \n {}", regEx, items);
         return items.stream()
                 .map(ItemMapper::itemToItemDto)
@@ -100,7 +104,7 @@ public class ItemServiceImpl implements ItemService {
             throw new IllegalArgumentException("У новой вещи не должен быть указан ID");
         }
 
-        Item item = itemStorage.save(registredItem);
+        Item item = itemStorage.saveItem(registredItem, itemRegisterDto.getRequestId());
         log.info("Сервис обработал запрос на сохранение нового предмета пользователя ID {}, с полученными данными: {}" +
                 " Результат: \n {}", userId, itemRegisterDto, item);
         return ItemMapper.itemToItemDto(item);
@@ -144,8 +148,7 @@ public class ItemServiceImpl implements ItemService {
                 .author(booking.getBooker())
                 .created(LocalDateTime.now())
                 .build();
-        commentStorage.save(comment);
-        return ItemMapper.commentToCommentDto(comment);
+        return ItemMapper.commentToCommentDto(commentStorage.save(comment));
     }
 
     private List<CommentDto> getCommentsDtoByItemId(final Long itemId) {

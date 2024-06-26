@@ -11,9 +11,8 @@ import javax.validation.constraints.Size;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDto {
+public class ItemForRequestDto {
     private Long id;
-    private Long owner;
     @Size(max = 100, message = "Название предмета не может превышать 100 символов")
     private String name;
     @Size(max = 500, message = "Описание предмета не может превышать 500 символов")

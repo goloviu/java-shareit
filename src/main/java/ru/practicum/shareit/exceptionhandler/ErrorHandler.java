@@ -88,4 +88,11 @@ public class ErrorHandler {
         log.warn("Произошла ошибка с комментарием. \n {}", exception);
         return new ErrorResponse(exception.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse itemRequestNotFoundHandle(ItemRequestNotFoundException exception) {
+        log.warn("Запрос на предмет не найден в базе данных. \n {}", exception);
+        return new ErrorResponse(exception.getMessage());
+    }
 }
