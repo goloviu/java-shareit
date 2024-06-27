@@ -18,7 +18,10 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -53,12 +56,27 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestWithAnswerDto> resultRequests = new ArrayList<>();
 
         if (!requests.isEmpty()) {
-            for (ItemRequest request : requests) {
-                List<Item> items = itemStorage.findAllByRequestId(request.getId());
+            List<Long> requestIds = requests.stream()
+                    .map(ItemRequest::getId)
+                    .collect(Collectors.toList());
+
+            List<Item> items = itemStorage.findAllByRequestIdIn(requestIds);
+
+            Map<Long, List<Item>> requestItems = items.stream()
+                    .collect(Collectors.toMap(
+                            item -> item.getRequest().getId(),
+                            item -> items.stream()
+                                    .filter(item1 -> item1.getRequest().getId().equals(item.getRequest().getId()))
+                                    .collect(Collectors.toList())
+                    ));
+
+            for (ItemRequest itemRequest : requests) {
                 ItemRequestWithAnswerDto requestDto = ItemRequestMapper
-                        .itemRequestToItemRequestWithAnswerDto(request, items);
+                        .itemRequestToItemRequestWithAnswerDto(itemRequest,
+                                requestItems.getOrDefault(itemRequest.getId(), Collections.emptyList()));
                 resultRequests.add(requestDto);
             }
+
         }
         log.info("Получены запросы на вещи с ответами из БД. \n {}", resultRequests);
         return resultRequests;
@@ -72,13 +90,28 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestWithAnswerDto> resultRequests = new ArrayList<>();
 
         if (!requests.isEmpty()) {
-            for (ItemRequest request : requests) {
-                List<Item> items = itemStorage.findAllByRequestId(request.getId());
+            List<Long> requestIds = requests.stream()
+                    .map(ItemRequest::getId)
+                    .collect(Collectors.toList());
+
+            List<Item> items = itemStorage.findAllByRequestIdIn(requestIds);
+
+            Map<Long, List<Item>> requestItems = items.stream()
+                    .collect(Collectors.toMap(
+                            item -> item.getRequest().getId(),
+                            item -> items.stream()
+                                    .filter(item1 -> item1.getRequest().getId().equals(item.getRequest().getId()))
+                                    .collect(Collectors.toList())
+                    ));
+
+            for (ItemRequest itemRequest : requests) {
                 ItemRequestWithAnswerDto requestDto = ItemRequestMapper
-                        .itemRequestToItemRequestWithAnswerDto(request, items);
+                        .itemRequestToItemRequestWithAnswerDto(itemRequest,
+                                requestItems.getOrDefault(itemRequest.getId(), Collections.emptyList()));
                 resultRequests.add(requestDto);
             }
         }
+
         log.info("Получены запросы на вещи с ответами из БД. \n {}", resultRequests);
         return resultRequests;
     }
@@ -90,7 +123,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         ItemRequest request = itemRequestStorage.findById(requestId)
                 .orElseThrow(() -> new ItemRequestNotFoundException("Запрос на вещь по указанному ID " + requestId
                         + " не найден"));
-        List<Item> items = itemStorage.findAllByRequestId(request.getId());
+        List<Item> items = itemStorage.findAllByRequestIdIn(List.of(request.getId()));
 
         return ItemRequestMapper.itemRequestToItemRequestWithAnswerDto(request, items);
     }

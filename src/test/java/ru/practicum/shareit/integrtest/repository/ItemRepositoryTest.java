@@ -120,7 +120,7 @@ class ItemRepositoryTest {
         item.setRequest(itemRequest);
 
         // do
-        List<Item> result = itemRepository.findAllByRequestId(requestId);
+        List<Item> result = itemRepository.findAllByRequestIdIn(List.of(requestId));
 
         // expect
         assertThat(result, hasSize(1));

@@ -123,7 +123,7 @@ class ItemRequestServiceImplTest {
 
         when(itemRequestStorage.findAllByRequestorIdOrderByCreatedAsc(anyLong()))
                 .thenReturn(List.of(request));
-        when(itemStorage.findAllByRequestId(anyLong()))
+        when(itemStorage.findAllByRequestIdIn(anyList()))
                 .thenReturn(List.of(item));
         when(userStorage.existsById(anyLong()))
                 .thenReturn(true);
@@ -141,7 +141,7 @@ class ItemRequestServiceImplTest {
         verify(userStorage, times(1))
                 .existsById(anyLong());
         verify(itemStorage, times(1))
-                .findAllByRequestId(anyLong());
+                .findAllByRequestIdIn(anyList());
         verifyNoMoreInteractions(userStorage, itemRequestStorage, itemStorage);
     }
 
@@ -190,7 +190,7 @@ class ItemRequestServiceImplTest {
 
         when(itemRequestStorage.findAllByRequestorIdNot(anyLong(), isA(PageRequest.class)))
                 .thenReturn(requests);
-        when(itemStorage.findAllByRequestId(anyLong()))
+        when(itemStorage.findAllByRequestIdIn(anyList()))
                 .thenReturn(List.of(item));
         when(userStorage.existsById(anyLong()))
                 .thenReturn(true);
@@ -210,7 +210,7 @@ class ItemRequestServiceImplTest {
         verify(userStorage, times(1))
                 .existsById(anyLong());
         verify(itemStorage, times(1))
-                .findAllByRequestId(anyLong());
+                .findAllByRequestIdIn(anyList());
         verifyNoMoreInteractions(userStorage, itemRequestStorage, itemStorage);
     }
 
@@ -256,7 +256,7 @@ class ItemRequestServiceImplTest {
 
         when(itemRequestStorage.findById(anyLong()))
                 .thenReturn(Optional.of(request));
-        when(itemStorage.findAllByRequestId(anyLong()))
+        when(itemStorage.findAllByRequestIdIn(anyList()))
                 .thenReturn(List.of(item));
         when(userStorage.existsById(anyLong()))
                 .thenReturn(true);
@@ -272,7 +272,7 @@ class ItemRequestServiceImplTest {
         verify(userStorage, times(1))
                 .existsById(anyLong());
         verify(itemStorage, times(1))
-                .findAllByRequestId(anyLong());
+                .findAllByRequestIdIn(anyList());
         verifyNoMoreInteractions(userStorage, itemRequestStorage, itemStorage);
     }
 
