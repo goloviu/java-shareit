@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
 
 import javax.validation.constraints.Size;
 
@@ -20,5 +19,5 @@ public class ItemDto {
     @Size(max = 500, message = "Описание предмета не может превышать 500 символов")
     private String description;
     private Boolean available;
-    private ItemRequest request;
+    private Long requestId;
 }

@@ -15,7 +15,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Builder
 public class BookingDto {
-    @NotBlank(message = "ID предмета не указан")
+    @NotBlank(message = "ID бронирования не указан")
     private Long id;
     @NotBlank(message = "Время начала бронирования не задано")
     private String start;

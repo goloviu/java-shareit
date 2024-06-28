@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
@@ -15,14 +16,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, Booking
             "JOIN FETCH b.booker " +
             "WHERE b.booker.id = ?1 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllByBookerId(final Long userId);
+    List<Booking> findAllByBookerId(final Long userId, final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.booker " +
             "WHERE b.booker.id = ?1 " +
             "AND b.end > ?2 " +
             "AND b.start < ?2")
-    List<Booking> findAllCurrentBookings(final Long userId, final LocalDateTime currentTime);
+    List<Booking> findAllCurrentBookings(final Long userId, final LocalDateTime currentTime,
+                                         final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.booker " +
@@ -30,55 +32,60 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, Booking
             "OR b.item.owner = ?1) " +
             "AND b.end < ?2 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllPastBookings(final Long userId, final LocalDateTime dateTimeNow);
+    List<Booking> findAllPastBookings(final Long userId, final LocalDateTime dateTimeNow, final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.booker " +
             "WHERE (b.booker.id = ?1 " +
             "OR b.item.owner = ?1) " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllFutureBookings(final Long userId);
+    List<Booking> findAllFutureBookings(final Long userId, final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.booker " +
             "WHERE b.booker.id = ?1 " +
             "AND b.status = ?2 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllByBookerAndStatus(final Long userId, final BookingStatusType state);
+    List<Booking> findAllByBookerAndStatus(final Long userId, final BookingStatusType state,
+                                           final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.item " +
             "WHERE b.item.owner = ?1 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllOwnerItemBookings(final Long userId);
+    List<Booking> findAllOwnerItemBookings(final Long userId, final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.item " +
             "WHERE b.item.owner = ?1 " +
             "AND b.end > ?2 " +
             "AND b.start < ?2")
-    List<Booking> findAllOwnerCurrentBookings(final Long userId, final LocalDateTime currentTime);
+    List<Booking> findAllOwnerCurrentBookings(final Long userId, final LocalDateTime currentTime,
+                                              final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.item " +
             "WHERE b.item.owner = ?1 " +
             "AND b.end < ?2 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllPastOwnerItemBookings(final Long userId, final LocalDateTime dateTime);
+    List<Booking> findAllPastOwnerItemBookings(final Long userId, final LocalDateTime dateTime,
+                                               final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.item " +
             "WHERE b.item.owner = ?1 " +
             "AND b.start > ?2 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllFutureOwnerItemBookings(final Long userId, final LocalDateTime currentTime);
+    List<Booking> findAllFutureOwnerItemBookings(final Long userId, final LocalDateTime currentTime,
+                                                 final Pageable page);
 
     @Query("SELECT b FROM Booking b " +
             "JOIN FETCH b.item " +
             "WHERE b.item.owner = ?1 " +
             "AND b.status = ?2 " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllOwnerItemBookedByStatus(final Long userId, final BookingStatusType state);
+    List<Booking> findAllOwnerItemBookedByStatus(final Long userId, final BookingStatusType state,
+                                                 final Pageable page);
 
     Optional<Booking> findFirstByItemId(final Long itemId);
 }

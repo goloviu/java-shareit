@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -9,7 +10,7 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.*;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -94,14 +95,14 @@ public class BookingServiceImpl implements BookingService {
                 booking);
 
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().equals(userId)) {
-            throw new PermissionException("У вас недостаточно прав для получения бронирования по ID " + booking);
+            throw new PermissionException("У вас недостаточно прав для получения бронирования по ID " + booking.getId());
         }
         return BookingMapper.bookingToBookingDto(booking);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getBookingByUserId(Long userId, String state) {
+    public List<BookingDto> getBookingByUserId(Long userId, String state, Pageable page) {
         if (!userStorage.existsById(userId)) {
             throw new UserNotFoundException("Пользователь не найден по ID " + userId);
         }
@@ -112,32 +113,32 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state.toUpperCase()) {
             case "ALL":
-                bookings = bookingStorage.findAllByBookerId(userId);
+                bookings = bookingStorage.findAllByBookerId(userId, page);
                 log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "CURRENT":
-                bookings = bookingStorage.findAllCurrentBookings(userId, LocalDateTime.now());
+                bookings = bookingStorage.findAllCurrentBookings(userId, LocalDateTime.now(), page);
                 log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "PAST":
-                bookings = bookingStorage.findAllPastBookings(userId, LocalDateTime.now());
+                bookings = bookingStorage.findAllPastBookings(userId, LocalDateTime.now(), page);
                 log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "FUTURE":
-                bookings = bookingStorage.findAllFutureBookings(userId);
+                bookings = bookingStorage.findAllFutureBookings(userId, page);
                 log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "WAITING":
-                bookings = bookingStorage.findAllByBookerAndStatus(userId, BookingStatusType.WAITING);
+                bookings = bookingStorage.findAllByBookerAndStatus(userId, BookingStatusType.WAITING, page);
                 log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "REJECTED":
-                bookings = bookingStorage.findAllByBookerAndStatus(userId, BookingStatusType.REJECTED);
+                bookings = bookingStorage.findAllByBookerAndStatus(userId, BookingStatusType.REJECTED, page);
                 log.info("Получен список бронирований с БД по пользователю ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
@@ -151,7 +152,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDto> getOwnerBookings(Long userId, String state) {
+    public List<BookingDto> getOwnerBookings(Long userId, String state, Pageable page) {
         if (!userStorage.existsById(userId)) {
             throw new UserNotFoundException("Пользователь не найден по ID " + userId);
         }
@@ -162,32 +163,32 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state.toUpperCase()) {
             case "ALL":
-                bookings = bookingStorage.findAllOwnerItemBookings(userId);
+                bookings = bookingStorage.findAllOwnerItemBookings(userId, page);
                 log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "CURRENT":
-                bookings = bookingStorage.findAllOwnerCurrentBookings(userId, LocalDateTime.now());
+                bookings = bookingStorage.findAllOwnerCurrentBookings(userId, LocalDateTime.now(), page);
                 log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "PAST":
-                bookings = bookingStorage.findAllPastOwnerItemBookings(userId, LocalDateTime.now());
+                bookings = bookingStorage.findAllPastOwnerItemBookings(userId, LocalDateTime.now(), page);
                 log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "FUTURE":
-                bookings = bookingStorage.findAllFutureOwnerItemBookings(userId, LocalDateTime.now());
+                bookings = bookingStorage.findAllFutureOwnerItemBookings(userId, LocalDateTime.now(), page);
                 log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "WAITING":
-                bookings = bookingStorage.findAllOwnerItemBookedByStatus(userId, BookingStatusType.WAITING);
+                bookings = bookingStorage.findAllOwnerItemBookedByStatus(userId, BookingStatusType.WAITING, page);
                 log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());
             case "REJECTED":
-                bookings = bookingStorage.findAllOwnerItemBookedByStatus(userId, BookingStatusType.REJECTED);
+                bookings = bookingStorage.findAllOwnerItemBookedByStatus(userId, BookingStatusType.REJECTED, page);
                 log.info("Получен список бронирований с БД по владельцу ID {} с статусом: \'{}\'," +
                         " Бронирования: \n {}", userId, state, bookings);
                 return bookings.stream().map(BookingMapper::bookingToBookingDto).collect(Collectors.toList());

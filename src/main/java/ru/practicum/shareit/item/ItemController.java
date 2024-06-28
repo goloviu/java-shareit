@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,9 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping(path = "/items")
 @Slf4j
 public class ItemController {
@@ -30,15 +34,21 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemWithBookingDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemWithBookingDto> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                  @RequestParam(defaultValue = "1") @Min(1) Integer from,
+                                                  @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.info("Получен GET запрос на получение всех предметов владельца по ID {}", userId);
-        return itemService.getOwnerItemsWithBookings(userId);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        return itemService.getOwnerItemsWithBookings(userId, pageRequest);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> findItemsByText(@RequestParam("text") String regEx) {
+    public List<ItemDto> findItemsByText(@RequestParam("text") String regEx,
+                                         @RequestParam(defaultValue = "1") @Min(1) Integer from,
+                                         @RequestParam(defaultValue = "10") @Min(1) Integer size) {
         log.info("Получен GET запрос на поиск предметов по ключевому слову {}", regEx);
-        return itemService.findItemsByText(regEx);
+        PageRequest pageRequest = PageRequest.of(from / size, size);
+        return itemService.findItemsByText(regEx, pageRequest);
     }
 
     @PostMapping

@@ -5,7 +5,7 @@ import ru.practicum.shareit.user.dto.UserRegisterDto;
 
 import java.util.List;
 
-interface UserService {
+public interface UserService {
 
     List<UserDto> getAllUsers();
 

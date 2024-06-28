@@ -20,13 +20,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse existUserExceptionHandle(UserAlreadyExistsException exception) {
-        log.warn("Пользователь уже существует \n {}", exception);
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse validationExceptionHandle(MethodArgumentNotValidException exception) {
         log.warn("Данные не прошли валидацию \n {}", exception);
@@ -86,6 +79,13 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse wrongAddCommentToBookingHandle(CommentException exception) {
         log.warn("Произошла ошибка с комментарием. \n {}", exception);
+        return new ErrorResponse(exception.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse itemRequestNotFoundHandle(ItemRequestNotFoundException exception) {
+        log.warn("Запрос на предмет не найден в базе данных. \n {}", exception);
         return new ErrorResponse(exception.getMessage());
     }
 }

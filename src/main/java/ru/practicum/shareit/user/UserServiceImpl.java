@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Autowired
@@ -38,12 +38,9 @@ class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto getUserById(final Long userId) {
-        if (!isUserExists(userId)) {
-            throw new UserNotFoundException("Пользователь не найден по ID " + userId);
-        }
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден по ID " + userId));
+
         log.info("Сервис обработал запрос на нахождение пользователя по ID {},\n {}", userId, user);
         return UserMapper.userToUserDto(user);
     }
