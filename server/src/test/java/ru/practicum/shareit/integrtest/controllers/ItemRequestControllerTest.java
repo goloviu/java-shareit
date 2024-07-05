@@ -17,7 +17,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestWithAnswerDto;
 import ru.practicum.shareit.request.dto.NewItemRequestDto;
 
-import javax.validation.ValidationException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
