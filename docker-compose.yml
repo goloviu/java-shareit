@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   server:
-    build: server/.
+    build: ./server
     ports:
       - "9090:9090"
     depends_on:
@@ -15,7 +15,7 @@ services:
       - SERVER_PORT=9090
 
   gateway:
-    build: gateway/.
+    build: ./gateway
     container_name: share-gateway
     ports:
       - "8080:8080"
