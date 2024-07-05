@@ -9,7 +9,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestWithAnswerDto;
 import ru.practicum.shareit.request.dto.NewItemRequestDto;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
