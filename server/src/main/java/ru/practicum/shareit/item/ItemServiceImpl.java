@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemWithBookingDto> getOwnerItemsWithBookings(final Long userId, final Pageable page) {
+    public List<ItemWithBookingDto> getOwnerItemsWithBookings(final Long userId, final PageRequest page) {
         List<Item> items = itemStorage.findByOwner(userId, page);
 
         log.info("Сервис обработал получение предметов из базы. Результат: \n {}", items);

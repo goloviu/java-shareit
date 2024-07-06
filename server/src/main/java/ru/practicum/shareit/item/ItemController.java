@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,8 +38,8 @@ public class ItemController {
                                                   @RequestParam() Integer from,
                                                   @RequestParam() Integer size) {
         log.info("Получен GET запрос на получение всех предметов владельца по ID {}", userId);
-        PageRequest pageRequest = PageRequest.of(from / size, size);
-        return itemService.getOwnerItemsWithBookings(userId, pageRequest);
+        PageRequest page = PageRequest.of(from / size, size, Sort.by("description").ascending());
+        return itemService.getOwnerItemsWithBookings(userId, page);
     }
 
     @GetMapping("/search")
