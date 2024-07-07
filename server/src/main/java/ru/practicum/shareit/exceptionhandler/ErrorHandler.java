@@ -55,13 +55,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse dateTimeWrongParameterHandle(DateTimeBookingException exception) {
-        log.warn("Параметры для запроса на бронирование введены неверно. \n {}", exception);
-        return new ErrorResponse(exception.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse bookingNotFoundHandle(BookingNotFoundException exception) {
         log.warn("Бронирование не найдено. \n {}", exception);

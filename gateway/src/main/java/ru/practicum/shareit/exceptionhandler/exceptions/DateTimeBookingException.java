@@ -1,4 +1,4 @@
-package ru.practicum.shareit.exceptions;
+package ru.practicum.shareit.exceptionhandler.exceptions;
 
 public class DateTimeBookingException extends RuntimeException {
     public DateTimeBookingException(String message) {

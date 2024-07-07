@@ -9,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exceptionhandler.exceptions.DateTimeBookingException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.time.LocalDateTime;
 
 
 @Controller
@@ -38,6 +40,7 @@ public class BookingControllerGateWay {
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @RequestBody @Valid BookItemRequestDto requestDto) {
         log.info("GateWay POST запрос на создание бронирования {}, userId={}", requestDto, userId);
+        checkBooking(requestDto);
         return bookingClient.bookItem(userId, requestDto);
     }
 
@@ -67,5 +70,27 @@ public class BookingControllerGateWay {
         log.info("GateWay GET запрос от владельца ID {} на получение своих забронированных вещей. Правило получения: {}",
                 userId, state);
         return bookingClient.getOwnerBookings(userId, state, from, size);
+    }
+
+    private void checkBooking(final BookItemRequestDto bookingRequestDto) {
+        LocalDateTime start = bookingRequestDto.getStart();
+        LocalDateTime end = bookingRequestDto.getEnd();
+
+        if (start == null || end == null) {
+            throw new DateTimeBookingException("Значения начала бронирования и конца бронирования должны быть указаны");
+        }
+
+        if (start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now())) {
+            throw new DateTimeBookingException("Дата и время бронирования не может быть в прошлом: " + start);
+        }
+
+        if (start.isAfter(end)) {
+            throw new DateTimeBookingException("Дата и время начала бронирования не может быть после окончания: "
+                    + start);
+        }
+
+        if (start.equals(end)) {
+            throw new DateTimeBookingException("Дата и время начала и конца бронирования не должны быть равны");
+        }
     }
 }

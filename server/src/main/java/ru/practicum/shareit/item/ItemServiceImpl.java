@@ -62,8 +62,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemStorage.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException("Предмет не найден по ID " + itemId));
 
-        log.info("Сервис обрабатывает запрос на получение предмета по ID {}, пользователем ID {}, \n {}", itemId,
-                userId);
+        log.info("Сервис обрабатывает запрос на получение предмета по ID {}, пользователем ID {}, Предмет: \n {}", itemId,
+                userId, item);
 
         if (item.getOwner().equals(userId)) {
             ItemWithBookingDto itemDto = getItemWitBookingDto(item);

@@ -37,7 +37,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto addNewRequest(Long userId, BookingRequestDto bookingRequestDto) {
         Booking bookingRequest = BookingMapper.bookingRequestDtoToBooking(bookingRequestDto);
-        checkBooking(bookingRequestDto);
         Long itemId = bookingRequestDto.getItemId();
 
         Item itemFromDb = itemStorage.findById(itemId)
@@ -199,28 +198,6 @@ public class BookingServiceImpl implements BookingService {
     private void checkAvailableItem(final Item item) {
         if (!item.getAvailable()) {
             throw new ItemNotAvailableForBookingException("Предмет не доступен для бронирования по ID " + item.getId());
-        }
-    }
-
-    private void checkBooking(final BookingRequestDto bookingRequestDto) {
-        LocalDateTime start = bookingRequestDto.getStart();
-        LocalDateTime end = bookingRequestDto.getEnd();
-
-        if (start == null || end == null) {
-            throw new DateTimeBookingException("Значения начала бронирования и конца бронирования должны быть указаны");
-        }
-
-        if (start.isBefore(LocalDateTime.now()) || end.isBefore(LocalDateTime.now())) {
-            throw new DateTimeBookingException("Дата и время бронирования не может быть в прошлом: " + start);
-        }
-
-        if (start.isAfter(end)) {
-            throw new DateTimeBookingException("Дата и время начала бронирования не может быть после окончания: "
-                    + start);
-        }
-
-        if (start.equals(end)) {
-            throw new DateTimeBookingException("Дата и время начала и конца бронирования не должны быть равны");
         }
     }
 }
